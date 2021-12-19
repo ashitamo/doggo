@@ -12,7 +12,7 @@ def get_model(input_shape,out=3):
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Conv2D(filters=24, kernel_size=(3, 3), padding='same', activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    #model.add(Dropout(0.333))
+    model.add(Dropout(0.333))
     model.add(Conv2D(filters=48, kernel_size=(3, 3), padding='same', activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Conv2D(filters=64, kernel_size=(3, 3), padding='same', activation='relu'))
@@ -26,8 +26,8 @@ def get_model(input_shape,out=3):
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.5))
     model.add(Flatten())
-    model.add(Dense(25, activation='relu'))
-    model.add(Dense(25, activation='relu'))
+    model.add(Dense(50, activation='relu'))
+    model.add(Dense(50, activation='relu'))
     #model.add(Dropout(0.33))
     model.add(Dense(out, activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=0.001), metrics=['accuracy'])
@@ -35,6 +35,7 @@ def get_model(input_shape,out=3):
     return model
 
 def get_train_data(img_folder,size):
+    convert='1'
     x_train=[]
     y_train=[]
     counter=-1
@@ -42,8 +43,9 @@ def get_train_data(img_folder,size):
         print(r.replace(img_folder,''))
         for i in f:
             img_path=r+'/'+i
-            img = Image.open(img_path).resize(size).convert('RGB')
+            img = Image.open(img_path).resize(size).convert(convert)
             img=np.array(img).astype('float32')
+            #img=[img[0]]
             x_train.append(img)
             y_train.append(counter)   
         counter+=1
@@ -51,13 +53,15 @@ def get_train_data(img_folder,size):
 
 
 img_folder='imgs/'
-input_shape=(224,224,3)
+input_shape=(224,224,1)
 categore=3
 x_train,y_train=get_train_data(img_folder,input_shape[:-1])
+x_train=x_train.reshape(-1,input_shape[0],input_shape[1],input_shape[2])
+
 x=int(len(x_train)*(1-0.25))
 x_train,x_train_val=x_train[:x],x_train[x:]
 y_train,y_train_val=y_train[:x],y_train[x:]
-index = [i for i in range(len(x_train))] 
+index = [i for i in range(len(x_train))]
 random.shuffle(index)
 x_train=x_train[index]
 y_train=y_train[index]
